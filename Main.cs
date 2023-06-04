@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
@@ -52,6 +53,32 @@ public class Program
             }
            
         }
+    }
+    public static void Task3(IMyCollections<IClass> h)
+    {
+        Func<IClass, IClass> function = (clas) =>
+        {
+            if (clas.students.Count >= 1)
+            {
+                Vector<IStudent> students = new();
+                Vector<ITeacher> teachers = new();
+                foreach (IStudent student in clas.students)
+                    students.Add(student);
+                foreach (ITeacher teach in clas.listofTeachers)
+                    teachers.Add(teach);
+                IStudent tmpstud = Algorithms<IStudent>.Find(students,stud => stud.names.Count == 2,true);
+                ITeacher tmpteach = Algorithms<ITeacher>.Find(teachers, teach => teach.names.Count == 2, true);
+                if (tmpstud != null && tmpteach != null)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine(tmpstud);
+                    Console.WriteLine(tmpteach);
+                    return clas;
+                }
+            }
+            return null;
+        };
+        Algorithms<IClass>.ForEach(h, function, true);
     }
     public static void Main()
     {
@@ -132,10 +159,10 @@ public class Program
         rooms.Add(room5);
         rooms.Add(room6);
         rooms.Add(room7);
-        List<ClassListAdapt> t1 = new();
-        List<RoomListAdapt> t2 = new();
-        List<TeacherListAdapt> t3 = new();
-        List<StudentListAdapt> t4 = new();
+        List<IClass> t1 = new();
+        List<IRoom> t2 = new();
+        List<ITeacher> t3 = new();
+        List<IStudent> t4 = new();
         List<ClassTextAdapt> t5 = new();
         List<RoomTextAdapt> t6 = new();
         List<TeacherTextAdapt> t7 = new();
@@ -145,7 +172,7 @@ public class Program
         {
             var k = new RoomList(item.number, item.type, item.classes);
             var kt = new RoomRep(item.number, item.type, item.classes);
-            t2.Add(new RoomListAdapt(k));
+            t2.Add(item);
             t6.Add(new RoomTextAdapt(kt));
             Slownik.Dict.Add(item.number.ToString(), k);
             foreach (var item1 in item.classes)
@@ -155,7 +182,7 @@ public class Program
                 var tt = new ClassListAdapt(t);
                 if (t1.Exists(e => e.Code == tt.Code) == false)
                 {
-                    t1.Add(tt);
+                    t1.Add(item1);
                     t5.Add(new ClassTextAdapt(tk));
                     Slownik.Dict.Add(tt.Code, item1);
                 }
@@ -166,7 +193,7 @@ public class Program
                     var tttt = new StudentListAdapt(ttt);
                     if (t4.Exists(e => e.code == tttt.code) == false)
                     {
-                        t4.Add(tttt);
+                        t4.Add(item2);
                         t8.Add(new StudentTextAdapt(tttk));
                         Slownik.Dict.Add(tttt.code, item2);
 
@@ -179,7 +206,7 @@ public class Program
                     var tttt = new TeacherListAdapt(ttt);
                     if (t3.Exists(e => e.code == tttt.code) == false)
                     {
-                        t3.Add(tttt);
+                        t3.Add(item2);
                         t7.Add(new TeacherTextAdapt(tttk));
                         Slownik.Dict.Add(tttt.code, item2);
 
@@ -187,13 +214,68 @@ public class Program
                 }
             }
         }
-        Console.WriteLine("Base Rep\n");
-        Program.PrintTask(rooms);
-        Console.WriteLine("List Rep\n");
-        Program.PrintTask(new List<IRoom>(t2));
-        Console.WriteLine("Text Rep\n");
-        Program.PrintTask(new List<IRoom>(t6));
+        //Console.WriteLine("Base Rep\n");
+        //Program.PrintTask(rooms);
+        //Console.WriteLine("List Rep\n");
+        //Program.PrintTask(new List<IRoom>(t2));
+        //Console.WriteLine("Text Rep\n");
+        //Program.PrintTask(new List<IRoom>(t6));
+        MyHashmap<IClass> h1 = new(100);
+        Vector<IClass> v1 = new();
+        DoublyLinkedList<IClass> l1 = new();
+        foreach (var item in t1)
+        {
+            h1.Add(item);
+            v1.Add(item);
+            l1.Add(item);
+        }
+        //Console.WriteLine("hashmap :");
+        //Program.Task3(h1);
+        //Console.WriteLine();
+        //Console.WriteLine("doubly linekd list :");
+        //Program.Task3(l1);
+        //Console.WriteLine();
+        //Console.WriteLine("vector :");
+        //Program.Task3(v1);
+        //Console.WriteLine();
+        var objectsClass = new MyHashmap<object>(100);
+        var objectsRoom = new MyHashmap<object>(100);
+        var objectsTeacher = new MyHashmap<object>(100);
+        var objectsStudent = new MyHashmap<object>(100);
+        foreach (var item in t1)
+        {
+            objectsClass.Add(item);
+        }
+        foreach (var item in t2)
+        {
+            objectsRoom.Add(item);
+        }
+        foreach (var item in t3)
+        {
+            objectsTeacher.Add(item);
+        }
+        foreach (var item in t4)
+        {
+            objectsStudent.Add(item);
+        }
+        Dictionary<string, IMyCollections<object>> allObjects = new();
+        allObjects.Add("Class", objectsClass);
+        allObjects.Add("Room", objectsRoom);
+        allObjects.Add("Teacher", objectsTeacher);
+        allObjects.Add("Student", objectsStudent);
+        var processor = new CommandProcessor(allObjects);
 
+        while (true)
+        {
+            Console.Write("ByTE> ");
+            var line = Console.ReadLine();
+
+            if (line != null)
+            {
+                processor.ProcessCommand(line);
+
+            }
+        }
 
     }
 }
